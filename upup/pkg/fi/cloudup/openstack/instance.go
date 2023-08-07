@@ -45,7 +45,7 @@ const (
 	BOOT_VOLUME_SIZE          = "osVolumeSize"
 	SERVER_GROUP_AFFINITY     = "serverGroupAffinity"
 
-	defaultActiveTimeout = time.Second * 120
+	defaultActiveTimeout = time.Minute * 10
 	activeStatus         = "ACTIVE"
 	errorStatus          = "ERROR"
 )
