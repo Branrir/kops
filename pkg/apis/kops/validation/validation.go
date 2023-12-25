@@ -1351,6 +1351,12 @@ func validateNetworkingCilium(cluster *kops.Cluster, v *kops.CiliumNetworkingSpe
 		}
 	}
 
+	if v.GatewayAPI != nil && fi.ValueOf(v.GatewayAPI.Enabled) {
+		if fi.ValueOf(c.KubeProxy.Enabled) {
+			allErrs = append(allErrs, field.Required(fldPath.Root().Child("kubeProxy"), "Cilium with Gateway API implementation requires a disabled kubeProxy"))
+		}
+	}
+
 	return allErrs
 }
 

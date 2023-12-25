@@ -5014,6 +5014,10 @@ spec:
                         description: 'EnableEncryption enables Cilium Encryption.
                           Default: false'
                         type: boolean
+                      enableGatewayAPI:
+                        description: 'EnableGatewayAPI enables Cilium implementation of Gateway API specification (Beta)
+                          Default: false'
+                        type: boolean
                       enableEndpointHealthChecking:
                         description: 'EnableEndpointHealthChecking enables connectivity
                           health checking between virtual endpoints. Default: true'

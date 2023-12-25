@@ -341,6 +341,12 @@ data:
   {{- end }}
   {{ end }}
   {{ end }}
+  {{ if .GatewayAPI.Enable }}
+  enable-gateway-api: "true"
+  enable-gateway-api-secrets-sync: "{{ .GatewayAPI.EnableGatewayApiSecretsSync }}"
+  gateway-api-secrets-namespace: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
+  {{ end }}
+
 
 {{ if WithDefaultBool .Hubble.Enabled false }}
 ---

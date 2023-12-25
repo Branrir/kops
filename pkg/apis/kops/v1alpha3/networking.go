@@ -462,6 +462,9 @@ type CiliumNetworkingSpec struct {
 
 	// Ingress specifies the configuration for Cilium Ingress settings.
 	Ingress *CiliumIngressSpec `json:"ingress,omitempty"`
+
+	// GatewayAPI specifies the configuration for cilium Gateway API settings.
+	GatewayAPI *GatewayApiSpec `json:"gatewayApi,omitempty"`
 }
 
 // CiliumIngressSpec configures Cilium Ingress settings.
@@ -503,3 +506,12 @@ type HubbleSpec struct {
 
 // GCPNetworkingSpec is the specification of GCP's native networking mode, using IP aliases.
 type GCPNetworkingSpec struct{}
+
+// GatewayApiSpec configures the Gateway API implementation of cilium (Beta)
+type GatewayApiSpec struct {
+	// EnableGatewayAPI enables Cilium implementation of the Gateway API spec (Beta)
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Specifies Namespace used for Gateway API secrets
+	GatewayApiSecretsNamespace string `json:"gatewayApiSecretsNamespace,omitempty"`
+}
