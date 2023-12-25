@@ -341,9 +341,10 @@ data:
   {{- end }}
   {{ end }}
   {{ end }}
-  {{ if .GatewayAPI.Enable }}
+  {{ if WithDefaultBool .GatewayAPI.Enabled false }}
   enable-gateway-api: "true"
-  enable-gateway-api-secrets-sync: "{{ .GatewayAPI.EnableGatewayApiSecretsSync }}"
+  kubeProxyReplacement: strict
+  enable-gateway-api-secrets-sync: "true"
   gateway-api-secrets-namespace: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
   {{ end }}
 
@@ -714,6 +715,31 @@ rules:
   - ingresses/status # To update ingress status with load balancer IP.
   verbs:
   - update
+{{ end }}
+{{ if WithDefaultBool .GatewayAPI.Enabled false }}
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gatewayclasses
+  - gateways
+  - tlsroutes
+  - httproutes
+  - referencegrants
+  - referencepolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gatewayclasses/status
+  - gateways/status
+  - httproutes/status
+  - tlsroutes/status
+  verbs:
+  - update
+  - patch
 {{ end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1739,3 +1765,82 @@ spec:
       io.cilium/app: operator
       name: cilium-operator
   maxUnavailable: 1
+{{ if WithDefaultBool .GatewayAPI.Enabled false }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cilium-gateway-secrets
+  namespace: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
+  labels:
+    k8s-app: cilium
+    app.kubernetes.io/part-of: cilium
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cilium-operator-gateway-secrets
+  namespace: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
+  labels:
+    k8s-app: cilium
+    app.kubernetes.io/part-of: cilium
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cilium-gateway-secrets
+  namespace: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
+  labels:
+    k8s-app: cilium
+    app.kubernetes.io/part-of: cilium
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-gateway-secrets
+subjects:
+- kind: ServiceAccount
+  name: "cilium"
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cilium-operator-gateway-secrets
+  namespace: "{{ .GatewayAPI.GatewayApiSecretsNamespace }}"
+  labels:
+    k8s-app: cilium
+    app.kubernetes.io/part-of: cilium
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-operator-gateway-secrets
+subjects:
+- kind: ServiceAccount
+  name: "cilium-operator"
+  namespace: kube-system
+---
+{{ end }}
